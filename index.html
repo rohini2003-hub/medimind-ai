@@ -12,7 +12,6 @@
     --surface2: #22263a;
     --border: #2e3350;
     --accent: #4f8ef7;
-    --accent2: #7c5cfc;
     --green: #22d3a5;
     --red: #f75c5c;
     --yellow: #f7c948;
@@ -31,8 +30,6 @@
     flex-direction: column;
     overflow: hidden;
   }
-
-  /* Header */
   header {
     display: flex;
     align-items: center;
@@ -49,221 +46,69 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 18px;
   }
-  header h1 {
-    font-family: 'Fraunces', serif;
-    font-size: 1.2rem;
-    font-weight: 600;
-    letter-spacing: -0.3px;
-  }
+  header h1 { font-family: 'Fraunces', serif; font-size: 1.2rem; font-weight: 600; }
   header p { font-size: 0.72rem; color: var(--muted); }
-  .status {
-    margin-left: auto;
-    display: flex; align-items: center; gap: 6px;
-    font-size: 0.72rem; color: var(--green);
-  }
-  .dot {
-    width: 7px; height: 7px;
-    background: var(--green);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%,100% { opacity:1; } 50% { opacity:0.4; }
-  }
+  .status { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: var(--green); }
+  .dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-  /* Chat area */
   #chat {
-    flex: 1;
-    overflow-y: auto;
-    padding: 24px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    scroll-behavior: smooth;
+    flex: 1; overflow-y: auto; padding: 24px 16px;
+    display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth;
   }
   #chat::-webkit-scrollbar { width: 4px; }
-  #chat::-webkit-scrollbar-track { background: transparent; }
   #chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-  /* Messages */
-  .msg-wrap {
-    display: flex;
-    gap: 10px;
-    animation: fadeUp 0.3s ease;
-    max-width: 760px;
-    margin: 0 auto;
-    width: 100%;
-  }
-  @keyframes fadeUp {
-    from { opacity:0; transform:translateY(10px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
+  .msg-wrap { display: flex; gap: 10px; animation: fadeUp 0.3s ease; max-width: 760px; margin: 0 auto; width: 100%; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
   .msg-wrap.user { flex-direction: row-reverse; }
-  .avatar {
-    width: 32px; height: 32px;
-    border-radius: 10px;
-    flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-  }
+  .avatar { width:32px; height:32px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:14px; }
   .avatar.bot { background: var(--surface2); border: 1px solid var(--border); }
   .avatar.user { background: var(--user-bubble); }
-  .bubble {
-    max-width: 78%;
-    padding: 12px 16px;
-    border-radius: 16px;
-    font-size: 0.88rem;
-    line-height: 1.6;
-    white-space: pre-wrap;
-  }
-  .bubble.bot {
-    background: var(--bot-bubble);
-    border: 1px solid var(--border);
-    border-top-left-radius: 4px;
-  }
-  .bubble.user {
-    background: var(--user-bubble);
-    color: white;
-    border-top-right-radius: 4px;
-  }
+  .bubble { max-width:78%; padding:12px 16px; border-radius:16px; font-size:0.88rem; line-height:1.6; white-space:pre-wrap; }
+  .bubble.bot { background: var(--bot-bubble); border: 1px solid var(--border); border-top-left-radius:4px; }
+  .bubble.user { background: var(--user-bubble); color:white; border-top-right-radius:4px; }
 
-  /* Urgency badge */
-  .urgency {
-    display: inline-block;
-    font-size: 0.68rem;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 20px;
-    margin-bottom: 6px;
-    letter-spacing: 0.5px;
-  }
-  .urgency.EMERGENCY { background: #f75c5c22; color: var(--red); border: 1px solid var(--red); }
-  .urgency.URGENT    { background: #f7c94822; color: var(--yellow); border: 1px solid var(--yellow); }
-  .urgency.INFO      { background: #22d3a522; color: var(--green); border: 1px solid var(--green); }
+  .urgency { display:inline-block; font-size:0.68rem; font-weight:600; padding:2px 8px; border-radius:20px; margin-bottom:6px; letter-spacing:0.5px; }
+  .urgency.EMERGENCY { background:#f75c5c22; color:var(--red); border:1px solid var(--red); }
+  .urgency.URGENT { background:#f7c94822; color:var(--yellow); border:1px solid var(--yellow); }
+  .urgency.INFO { background:#22d3a522; color:var(--green); border:1px solid var(--green); }
 
-  /* Typing */
-  .typing { display: flex; align-items: center; gap: 4px; padding: 8px 4px; }
-  .typing span {
-    width: 7px; height: 7px;
-    background: var(--muted);
-    border-radius: 50%;
-    animation: bounce 1.2s infinite;
-  }
-  .typing span:nth-child(2) { animation-delay: 0.2s; }
-  .typing span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes bounce {
-    0%,80%,100% { transform:translateY(0); }
-    40% { transform:translateY(-6px); }
-  }
+  .typing { display:flex; align-items:center; gap:4px; padding:8px 4px; }
+  .typing span { width:7px; height:7px; background:var(--muted); border-radius:50%; animation:bounce 1.2s infinite; }
+  .typing span:nth-child(2){animation-delay:0.2s} .typing span:nth-child(3){animation-delay:0.4s}
+  @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
 
-  /* Agent steps */
-  .agents {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 8px;
-  }
-  .agent-tag {
-    font-size: 0.65rem;
-    padding: 2px 8px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    display: flex; align-items: center; gap: 4px;
-  }
-  .agent-tag.done { color: var(--green); border-color: var(--green); }
+  .agents { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
+  .agent-tag { font-size:0.65rem; padding:2px 8px; border-radius:20px; border:1px solid var(--border); color:var(--muted); }
+  .agent-tag.done { color:var(--green); border-color:var(--green); }
 
-  /* Input area */
-  .input-area {
-    padding: 16px;
-    border-top: 1px solid var(--border);
-    background: var(--surface);
-    flex-shrink: 0;
-  }
-  .input-row {
-    display: flex;
-    gap: 10px;
-    max-width: 760px;
-    margin: 0 auto;
-    align-items: flex-end;
-  }
+  .input-area { padding:16px; border-top:1px solid var(--border); background:var(--surface); flex-shrink:0; }
+  .input-row { display:flex; gap:10px; max-width:760px; margin:0 auto; align-items:flex-end; }
   textarea {
-    flex: 1;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.88rem;
-    padding: 12px 16px;
-    resize: none;
-    outline: none;
-    max-height: 120px;
-    min-height: 44px;
-    transition: border 0.2s;
-    line-height: 1.5;
+    flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:14px;
+    color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.88rem; padding:12px 16px;
+    resize:none; outline:none; max-height:120px; min-height:44px; transition:border 0.2s; line-height:1.5;
   }
-  textarea:focus { border-color: var(--accent); }
-  textarea::placeholder { color: var(--muted); }
+  textarea:focus { border-color:var(--accent); }
+  textarea::placeholder { color:var(--muted); }
   button#send {
-    width: 44px; height: 44px;
-    background: var(--user-bubble);
-    border: none; border-radius: 12px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    transition: opacity 0.2s, transform 0.1s;
+    width:44px; height:44px; background:var(--user-bubble); border:none; border-radius:12px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:opacity 0.2s,transform 0.1s;
   }
-  button#send:hover { opacity: 0.85; }
-  button#send:active { transform: scale(0.93); }
+  button#send:hover{opacity:0.85} button#send:active{transform:scale(0.93)}
   button#send svg { width:18px; height:18px; fill:white; }
 
-  /* Quick prompts */
-  .quick-prompts {
-    display: flex; gap: 8px; flex-wrap: wrap;
-    max-width: 760px; margin: 0 auto 12px;
-  }
-  .qp {
-    font-size: 0.72rem;
-    padding: 5px 12px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .qp:hover { border-color: var(--accent); color: var(--accent); }
+  .quick-prompts { display:flex; gap:8px; flex-wrap:wrap; max-width:760px; margin:0 auto 12px; }
+  .qp { font-size:0.72rem; padding:5px 12px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; color:var(--muted); cursor:pointer; transition:all 0.2s; }
+  .qp:hover { border-color:var(--accent); color:var(--accent); }
 
-  /* Welcome */
-  .welcome {
-    text-align: center;
-    padding: 40px 20px;
-    max-width: 500px;
-    margin: auto;
-  }
-  .welcome .icon { font-size: 3rem; margin-bottom: 16px; }
-  .welcome h2 {
-    font-family: 'Fraunces', serif;
-    font-size: 1.6rem;
-    margin-bottom: 10px;
-    background: var(--user-bubble);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .welcome p { color: var(--muted); font-size: 0.88rem; line-height: 1.7; }
-  .features {
-    display: flex; gap: 8px; flex-wrap: wrap;
-    justify-content: center; margin-top: 20px;
-  }
-  .feat {
-    font-size: 0.72rem;
-    padding: 5px 12px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    color: var(--muted);
-  }
+  .welcome { text-align:center; padding:40px 20px; max-width:500px; margin:auto; }
+  .welcome .icon { font-size:3rem; margin-bottom:16px; }
+  .welcome h2 { font-family:'Fraunces',serif; font-size:1.6rem; margin-bottom:10px; background:var(--user-bubble); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .welcome p { color:var(--muted); font-size:0.88rem; line-height:1.7; }
+  .features { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:20px; }
+  .feat { font-size:0.72rem; padding:5px 12px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; color:var(--muted); }
 </style>
 </head>
 <body>
@@ -272,7 +117,7 @@
   <div class="logo">🧠</div>
   <div>
     <h1>MediMind AI</h1>
-    <p>Intelligent Medical Assistant</p>
+    <p>Intelligent Medical Assistant — Powered by Llama 3.3</p>
   </div>
   <div class="status"><div class="dot"></div> Online</div>
 </header>
@@ -281,7 +126,7 @@
   <div class="welcome" id="welcome">
     <div class="icon">🩺</div>
     <h2>MediMind AI</h2>
-    <p>Ask me about symptoms, medications, lab values, or health conditions. Powered by multi-agent AI with medical RAG retrieval.</p>
+    <p>Ask me about symptoms, medications, lab values, or health conditions. Powered by multi-agent AI with medical knowledge.</p>
     <div class="features">
       <span class="feat">🤖 Multi-Agent</span>
       <span class="feat">📚 RAG Search</span>
@@ -308,143 +153,11 @@
 </div>
 
 <script>
-const API_KEY = "AIzaSyB0fIlbgItKPYlJJgNxX4jLvcXfS-q_I9w";
-const MODEL   = "gemini-2.0-flash";  // ✅ Fixed model name
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+const API_KEY = "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";
+const API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const MODEL   = "llama-3.3-70b-versatile";
 
-let conversationHistory = [];
-let isTyping = false;
-
-// Injection patterns
-const INJECTION = [
-  /ignore (previous|all) instructions/i,
-  /you are now/i,
-  /disregard your/i,
-  /pretend you('re| are)/i,
-  /jailbreak/i,
-  /dan mode/i,
-  /system prompt/i,
-  /forget your (rules|instructions)/i
-];
-
-function checkGuardrails(text) {
-  return INJECTION.some(p => p.test(text));
-}
-
-function getUrgency(text) {
-  const t = text.toLowerCase();
-  if (/chest pain|heart attack|stroke|can't breathe|emergency|911|dying|unconscious|seizure/.test(t))
-    return "EMERGENCY";
-  if (/severe|urgent|immediately|worse|bleeding|high fever|infection/.test(t))
-    return "URGENT";
-  return "INFO";
-}
-
-function autoResize(el) {
-  el.style.height = "auto";
-  el.style.height = Math.min(el.scrollHeight, 120) + "px";
-}
-
-function handleKey(e) {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-}
-
-function quickSend(el) {
-  document.getElementById("input").value = el.textContent;
-  sendMessage();
-}
-
-function addMessage(role, content, urgency = null, agents = null) {
-  const welcome = document.getElementById("welcome");
-  if (welcome) welcome.remove();
-
-  const chat = document.getElementById("chat");
-  const wrap = document.createElement("div");
-  wrap.className = `msg-wrap ${role}`;
-
-  const avatar = document.createElement("div");
-  avatar.className = `avatar ${role}`;
-  avatar.textContent = role === "user" ? "👤" : "🧠";
-
-  const bubble = document.createElement("div");
-  bubble.className = `bubble ${role}`;
-
-  if (role === "bot") {
-    if (agents) {
-      const agDiv = document.createElement("div");
-      agDiv.className = "agents";
-      agents.forEach(a => {
-        const t = document.createElement("span");
-        t.className = "agent-tag done";
-        t.textContent = a;
-        agDiv.appendChild(t);
-      });
-      bubble.appendChild(agDiv);
-    }
-    if (urgency) {
-      const badge = document.createElement("div");
-      badge.className = `urgency ${urgency}`;
-      const labels = { EMERGENCY:"🚨 EMERGENCY", URGENT:"⚠️ URGENT", INFO:"ℹ️ INFORMATIONAL" };
-      badge.textContent = labels[urgency] || urgency;
-      bubble.appendChild(badge);
-    }
-  }
-
-  const text = document.createElement("div");
-  text.textContent = content;
-  bubble.appendChild(text);
-
-  wrap.appendChild(avatar);
-  wrap.appendChild(bubble);
-  chat.appendChild(wrap);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function showTyping() {
-  const chat = document.getElementById("chat");
-  const wrap = document.createElement("div");
-  wrap.className = "msg-wrap bot";
-  wrap.id = "typing-indicator";
-  wrap.innerHTML = `
-    <div class="avatar bot">🧠</div>
-    <div class="bubble bot"><div class="typing"><span></span><span></span><span></span></div></div>
-  `;
-  chat.appendChild(wrap);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function removeTyping() {
-  const t = document.getElementById("typing-indicator");
-  if (t) t.remove();
-}
-
-async function sendMessage() {
-  if (isTyping) return;
-  const input = document.getElementById("input");
-  const msg = input.value.trim();
-  if (!msg) return;
-
-  input.value = "";
-  input.style.height = "auto";
-  isTyping = true;
-
-  // Guardrail check
-  if (checkGuardrails(msg)) {
-    addMessage("user", msg);
-    addMessage("bot", "🛡️ Your message was blocked by safety guardrails. Please ask a genuine medical question.", "INFO");
-    isTyping = false;
-    return;
-  }
-
-  addMessage("user", msg);
-  const urgency = getUrgency(msg);
-  showTyping();
-
-  // Build full prompt with RAG-style medical context
-  const systemPrompt = `You are MediMind AI, an intelligent medical information assistant.
+const SYSTEM_PROMPT = `You are MediMind AI, an intelligent medical information assistant.
 
 RULES:
 1. Answer ONLY medical/health questions
@@ -460,29 +173,133 @@ You act as 3 agents working together:
 - Evidence Agent: Provide medical evidence-based information
 - Safety Agent: Ensure safe, responsible output`;
 
-  conversationHistory.push({ role: "user", parts: [{ text: msg }] });
+let conversationHistory = [{ role: "system", content: SYSTEM_PROMPT }];
+let isTyping = false;
 
-  const payload = {
-    system_instruction: { parts: [{ text: systemPrompt }] },
-    contents: conversationHistory,
-    generationConfig: { temperature: 0.3, maxOutputTokens: 1000 }
-  };
+const INJECTION = [
+  /ignore (previous|all) instructions/i,
+  /you are now/i,
+  /disregard your/i,
+  /pretend you('re| are)/i,
+  /jailbreak/i,
+  /dan mode/i,
+  /system prompt/i,
+  /forget your (rules|instructions)/i
+];
+
+function checkGuardrails(text) { return INJECTION.some(p => p.test(text)); }
+
+function getUrgency(text) {
+  const t = text.toLowerCase();
+  if (/chest pain|heart attack|stroke|can't breathe|emergency|911|dying|unconscious|seizure/.test(t)) return "EMERGENCY";
+  if (/severe|urgent|immediately|worse|bleeding|high fever|infection/.test(t)) return "URGENT";
+  return "INFO";
+}
+
+function autoResize(el) { el.style.height="auto"; el.style.height=Math.min(el.scrollHeight,120)+"px"; }
+function handleKey(e) { if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();} }
+function quickSend(el) { document.getElementById("input").value=el.textContent; sendMessage(); }
+
+function addMessage(role, content, urgency=null, agents=null) {
+  const welcome = document.getElementById("welcome");
+  if (welcome) welcome.remove();
+
+  const chat = document.getElementById("chat");
+  const wrap = document.createElement("div");
+  wrap.className = `msg-wrap ${role}`;
+
+  const avatar = document.createElement("div");
+  avatar.className = `avatar ${role}`;
+  avatar.textContent = role==="user" ? "👤" : "🧠";
+
+  const bubble = document.createElement("div");
+  bubble.className = `bubble ${role}`;
+
+  if (role==="bot") {
+    if (agents) {
+      const agDiv = document.createElement("div");
+      agDiv.className = "agents";
+      agents.forEach(a => {
+        const t = document.createElement("span");
+        t.className = "agent-tag done";
+        t.textContent = a;
+        agDiv.appendChild(t);
+      });
+      bubble.appendChild(agDiv);
+    }
+    if (urgency) {
+      const badge = document.createElement("div");
+      badge.className = `urgency ${urgency}`;
+      const labels = {EMERGENCY:"🚨 EMERGENCY", URGENT:"⚠️ URGENT", INFO:"ℹ️ INFORMATIONAL"};
+      badge.textContent = labels[urgency]||urgency;
+      bubble.appendChild(badge);
+    }
+  }
+
+  const text = document.createElement("div");
+  text.textContent = content;
+  bubble.appendChild(text);
+  wrap.appendChild(avatar);
+  wrap.appendChild(bubble);
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function showTyping() {
+  const chat = document.getElementById("chat");
+  const wrap = document.createElement("div");
+  wrap.className = "msg-wrap bot";
+  wrap.id = "typing-indicator";
+  wrap.innerHTML = `<div class="avatar bot">🧠</div><div class="bubble bot"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeTyping() { const t=document.getElementById("typing-indicator"); if(t) t.remove(); }
+
+async function sendMessage() {
+  if (isTyping) return;
+  const input = document.getElementById("input");
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  input.value = "";
+  input.style.height = "auto";
+  isTyping = true;
+
+  if (checkGuardrails(msg)) {
+    addMessage("user", msg);
+    addMessage("bot", "🛡️ Your message was blocked by safety guardrails. Please ask a genuine medical question.", "INFO");
+    isTyping = false;
+    return;
+  }
+
+  addMessage("user", msg);
+  const urgency = getUrgency(msg);
+  showTyping();
+
+  conversationHistory.push({ role: "user", content: msg });
 
   try {
     const res = await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_KEY}`
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: conversationHistory,
+        temperature: 0.3,
+        max_tokens: 1000
+      })
     });
 
     const data = await res.json();
+    if (!res.ok) throw new Error(data?.error?.message || "API error");
 
-    if (!res.ok) {
-      throw new Error(data?.error?.message || "API error");
-    }
-
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
-    conversationHistory.push({ role: "model", parts: [{ text: reply }] });
+    const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+    conversationHistory.push({ role: "assistant", content: reply });
 
     removeTyping();
     addMessage("bot", reply, urgency, ["🔍 Triage", "📚 Evidence", "✅ Safety"]);

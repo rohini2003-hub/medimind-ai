@@ -69,6 +69,9 @@
   .bubble.bot { background: var(--bot-bubble); border: 1px solid var(--border); border-top-left-radius:4px; }
   .bubble.user { background: var(--user-bubble); color:white; border-top-right-radius:4px; }
 
+  /* Image preview in chat */
+  .bubble img { max-width: 100%; border-radius: 10px; margin-bottom: 8px; display: block; }
+
   .urgency { display:inline-block; font-size:0.68rem; font-weight:600; padding:2px 8px; border-radius:20px; margin-bottom:6px; letter-spacing:0.5px; }
   .urgency.EMERGENCY { background:#f75c5c22; color:var(--red); border:1px solid var(--red); }
   .urgency.URGENT { background:#f7c94822; color:var(--yellow); border:1px solid var(--yellow); }
@@ -83,7 +86,7 @@
   .agent-tag { font-size:0.65rem; padding:2px 8px; border-radius:20px; border:1px solid var(--border); color:var(--muted); }
   .agent-tag.done { color:var(--green); border-color:var(--green); }
 
-  .input-area { padding:16px; border-top:1px solid var(--border); background:var(--surface); flex-shrink:0; }
+  .input-area { padding:12px 16px 16px; border-top:1px solid var(--border); background:var(--surface); flex-shrink:0; }
   .input-row { display:flex; gap:10px; max-width:760px; margin:0 auto; align-items:flex-end; }
   textarea {
     flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:14px;
@@ -92,15 +95,39 @@
   }
   textarea:focus { border-color:var(--accent); }
   textarea::placeholder { color:var(--muted); }
-  button#send {
+
+  .btn-send {
     width:44px; height:44px; background:var(--user-bubble); border:none; border-radius:12px;
     cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:opacity 0.2s,transform 0.1s;
   }
-  button#send:hover{opacity:0.85} button#send:active{transform:scale(0.93)}
-  button#send svg { width:18px; height:18px; fill:white; }
+  .btn-send:hover{opacity:0.85} .btn-send:active{transform:scale(0.93)}
+  .btn-send svg { width:18px; height:18px; fill:white; }
 
-  .quick-prompts { display:flex; gap:8px; flex-wrap:wrap; max-width:760px; margin:0 auto 12px; }
-  .qp { font-size:0.72rem; padding:5px 12px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; color:var(--muted); cursor:pointer; transition:all 0.2s; }
+  /* Image upload button */
+  .btn-img {
+    width:44px; height:44px; background:var(--surface2); border:1px solid var(--border); border-radius:12px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    transition:all 0.2s; font-size:18px;
+  }
+  .btn-img:hover { border-color:var(--accent); background:var(--surface); }
+  #fileInput { display:none; }
+
+  /* Image preview bar */
+  #imgPreviewBar {
+    display:none; max-width:760px; margin:0 auto 10px;
+    background:var(--surface2); border:1px solid var(--border);
+    border-radius:12px; padding:8px 12px;
+    align-items:center; gap:10px;
+  }
+  #imgPreviewBar.show { display:flex; }
+  #imgPreviewThumb { width:40px; height:40px; object-fit:cover; border-radius:8px; }
+  #imgPreviewName { font-size:0.78rem; color:var(--muted); flex:1; }
+  #imgPreviewRemove {
+    background:none; border:none; color:var(--red); cursor:pointer; font-size:18px; line-height:1;
+  }
+
+  .quick-prompts { display:flex; gap:8px; flex-wrap:wrap; max-width:760px; margin:0 auto 10px; }
+  .qp { font-size:0.72rem; padding:5px 12px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; color:var(--muted); cursor:pointer; transition:all 0.2s; white-space:nowrap; }
   .qp:hover { border-color:var(--accent); color:var(--accent); }
 
   .welcome { text-align:center; padding:40px 20px; max-width:500px; margin:auto; }
@@ -126,12 +153,13 @@
   <div class="welcome" id="welcome">
     <div class="icon">🩺</div>
     <h2>MediMind AI</h2>
-    <p>Ask me about symptoms, medications, lab values, or health conditions. Powered by multi-agent AI with medical knowledge.</p>
+    <p>Ask me about symptoms, medications, or <strong>📸 upload a lab report image</strong> and I'll explain the results in simple language!</p>
     <div class="features">
       <span class="feat">🤖 Multi-Agent</span>
       <span class="feat">📚 RAG Search</span>
       <span class="feat">🛡️ Guardrails</span>
       <span class="feat">🧠 Memory</span>
+      <span class="feat">📸 Image Analysis</span>
       <span class="feat">🚨 Urgency Detection</span>
     </div>
   </div>
@@ -139,23 +167,39 @@
 
 <div class="input-area">
   <div class="quick-prompts">
-    <div class="qp" onclick="quickSend(this)">What are symptoms of diabetes?</div>
-    <div class="qp" onclick="quickSend(this)">Is ibuprofen safe with blood pressure meds?</div>
+    <div class="qp" onclick="quickSend(this)">Symptoms of diabetes?</div>
+    <div class="qp" onclick="quickSend(this)">Is ibuprofen safe with BP meds?</div>
     <div class="qp" onclick="quickSend(this)">What does high creatinine mean?</div>
-    <div class="qp" onclick="quickSend(this)">Explain hypertension treatment</div>
+    <div class="qp" onclick="quickSend(this)">📸 Upload a lab report</div>
   </div>
+
+  <!-- Image preview bar -->
+  <div id="imgPreviewBar">
+    <img id="imgPreviewThumb" src="" alt="preview"/>
+    <span id="imgPreviewName">image.jpg</span>
+    <button id="imgPreviewRemove" onclick="removeImage()">✕</button>
+  </div>
+
   <div class="input-row">
-    <textarea id="input" rows="1" placeholder="Ask a medical question..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-    <button id="send" onclick="sendMessage()">
+    <!-- Image upload button -->
+    <button class="btn-img" onclick="document.getElementById('fileInput').click()" title="Upload lab report image">📸</button>
+    <input type="file" id="fileInput" accept="image/*" onchange="handleImageSelect(event)"/>
+
+    <textarea id="input" rows="1"
+      placeholder="Ask a medical question or upload a lab report image..."
+      onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+
+    <button class="btn-send" onclick="sendMessage()">
       <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
     </button>
   </div>
 </div>
 
 <script>
-const API_KEY = "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";
-const API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const MODEL   = "llama-3.3-70b-versatile";
+const GROQ_KEY = "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";
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const TEXT_MODEL  = "llama-3.3-70b-versatile";
+const VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"; // Groq vision model
 
 const SYSTEM_PROMPT = `You are MediMind AI, an intelligent medical information assistant.
 
@@ -166,16 +210,20 @@ RULES:
 4. For emergencies, immediately say "CALL 911 / EMERGENCY SERVICES NOW"
 5. Be clear, accurate, and empathetic
 6. Use simple language a patient can understand
-7. Mention relevant medications, symptoms, or tests when appropriate
+7. When analyzing lab reports: list each test, its value, normal range, and whether it is normal or abnormal
 
-You act as 3 agents working together:
+You act as 3 agents:
 - Triage Agent: Assess urgency
-- Evidence Agent: Provide medical evidence-based information
+- Evidence Agent: Provide evidence-based medical information with citations
 - Safety Agent: Ensure safe, responsible output`;
 
 let conversationHistory = [{ role: "system", content: SYSTEM_PROMPT }];
 let isTyping = false;
+let selectedImageBase64 = null;
+let selectedImageType = null;
+let selectedImageName = null;
 
+// Guardrail patterns
 const INJECTION = [
   /ignore (previous|all) instructions/i,
   /you are now/i,
@@ -197,10 +245,55 @@ function getUrgency(text) {
 }
 
 function autoResize(el) { el.style.height="auto"; el.style.height=Math.min(el.scrollHeight,120)+"px"; }
-function handleKey(e) { if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();} }
-function quickSend(el) { document.getElementById("input").value=el.textContent; sendMessage(); }
 
-function addMessage(role, content, urgency=null, agents=null) {
+function handleKey(e) {
+  if (e.key==="Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function quickSend(el) {
+  if (el.textContent.includes("Upload")) {
+    document.getElementById("fileInput").click();
+  } else {
+    document.getElementById("input").value = el.textContent;
+    sendMessage();
+  }
+}
+
+// ── Image handling ──────────────────────────────────────────
+function handleImageSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  selectedImageName = file.name;
+  selectedImageType = file.type;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataURL = e.target.result;
+    selectedImageBase64 = dataURL.split(",")[1];
+
+    // Show preview bar
+    document.getElementById("imgPreviewThumb").src = dataURL;
+    document.getElementById("imgPreviewName").textContent = file.name;
+    document.getElementById("imgPreviewBar").classList.add("show");
+
+    // Set placeholder text
+    document.getElementById("input").placeholder = "Ask something about this image, or just press Send to analyze it...";
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage() {
+  selectedImageBase64 = null;
+  selectedImageType = null;
+  selectedImageName = null;
+  document.getElementById("fileInput").value = "";
+  document.getElementById("imgPreviewBar").classList.remove("show");
+  document.getElementById("input").placeholder = "Ask a medical question or upload a lab report image...";
+}
+
+// ── Message display ─────────────────────────────────────────
+function addMessage(role, content, urgency=null, agents=null, imageDataURL=null) {
   const welcome = document.getElementById("welcome");
   if (welcome) welcome.remove();
 
@@ -215,7 +308,7 @@ function addMessage(role, content, urgency=null, agents=null) {
   const bubble = document.createElement("div");
   bubble.className = `bubble ${role}`;
 
-  if (role==="bot") {
+  if (role === "bot") {
     if (agents) {
       const agDiv = document.createElement("div");
       agDiv.className = "agents";
@@ -231,14 +324,22 @@ function addMessage(role, content, urgency=null, agents=null) {
       const badge = document.createElement("div");
       badge.className = `urgency ${urgency}`;
       const labels = {EMERGENCY:"🚨 EMERGENCY", URGENT:"⚠️ URGENT", INFO:"ℹ️ INFORMATIONAL"};
-      badge.textContent = labels[urgency]||urgency;
+      badge.textContent = labels[urgency] || urgency;
       bubble.appendChild(badge);
     }
+  }
+
+  // Show image preview inside user bubble
+  if (imageDataURL) {
+    const img = document.createElement("img");
+    img.src = imageDataURL;
+    bubble.appendChild(img);
   }
 
   const text = document.createElement("div");
   text.textContent = content;
   bubble.appendChild(text);
+
   wrap.appendChild(avatar);
   wrap.appendChild(bubble);
   chat.appendChild(wrap);
@@ -257,57 +358,114 @@ function showTyping() {
 
 function removeTyping() { const t=document.getElementById("typing-indicator"); if(t) t.remove(); }
 
+// ── Send message ────────────────────────────────────────────
 async function sendMessage() {
   if (isTyping) return;
   const input = document.getElementById("input");
   const msg = input.value.trim();
-  if (!msg) return;
+
+  // Must have either text or image
+  if (!msg && !selectedImageBase64) return;
+
+  // Guardrail check
+  if (msg && checkGuardrails(msg)) {
+    addMessage("user", msg);
+    addMessage("bot", "🛡️ Your message was blocked by safety guardrails. Please ask a genuine medical question.", "INFO");
+    return;
+  }
 
   input.value = "";
   input.style.height = "auto";
   isTyping = true;
 
-  if (checkGuardrails(msg)) {
-    addMessage("user", msg);
-    addMessage("bot", "🛡️ Your message was blocked by safety guardrails. Please ask a genuine medical question.", "INFO");
-    isTyping = false;
-    return;
-  }
+  const hasImage = !!selectedImageBase64;
+  const displayMsg = msg || (hasImage ? "Please analyze this lab report image." : "");
+  const imageDataURL = hasImage ? document.getElementById("imgPreviewThumb").src : null;
 
-  addMessage("user", msg);
-  const urgency = getUrgency(msg);
+  addMessage("user", displayMsg, null, null, imageDataURL);
+  const urgency = getUrgency(displayMsg);
   showTyping();
 
-  conversationHistory.push({ role: "user", content: msg });
+  // Clear image after showing
+  const imgBase64 = selectedImageBase64;
+  const imgType = selectedImageType;
+  if (hasImage) removeImage();
 
   try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${API_KEY}`
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: conversationHistory,
-        temperature: 0.3,
-        max_tokens: 1000
-      })
-    });
+    let reply;
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error?.message || "API error");
+    if (hasImage) {
+      // ── Vision request (multimodal) ──
+      const visionMessages = [
+        { role: "system", content: SYSTEM_PROMPT },
+        ...conversationHistory.slice(1), // existing history without system
+        {
+          role: "user",
+          content: [
+            {
+              type: "image_url",
+              image_url: { url: `data:${imgType};base64,${imgBase64}` }
+            },
+            {
+              type: "text",
+              text: msg || "Please analyze this medical lab report image. List every test found, its value, the normal reference range, and whether it is normal or abnormal. Explain what abnormal values mean in simple language."
+            }
+          ]
+        }
+      ];
 
-    const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
-    conversationHistory.push({ role: "assistant", content: reply });
+      const res = await fetch(GROQ_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${GROQ_KEY}`
+        },
+        body: JSON.stringify({
+          model: VISION_MODEL,
+          messages: visionMessages,
+          temperature: 0.3,
+          max_tokens: 1500
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message || "Vision API error");
+      reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't analyze the image.";
+
+    } else {
+      // ── Text-only request ──
+      conversationHistory.push({ role: "user", content: displayMsg });
+
+      const res = await fetch(GROQ_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${GROQ_KEY}`
+        },
+        body: JSON.stringify({
+          model: TEXT_MODEL,
+          messages: conversationHistory,
+          temperature: 0.3,
+          max_tokens: 1000
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message || "API error");
+      reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+      conversationHistory.push({ role: "assistant", content: reply });
+    }
 
     removeTyping();
-    addMessage("bot", reply, urgency, ["🔍 Triage", "📚 Evidence", "✅ Safety"]);
+    const agents = hasImage
+      ? ["📸 Image Analysis", "🔍 Triage", "📚 Evidence", "✅ Safety"]
+      : ["🔍 Triage", "📚 Evidence", "✅ Safety"];
+    addMessage("bot", reply, urgency, agents);
 
   } catch (err) {
     removeTyping();
-    addMessage("bot", `⚠️ Error: ${err.message}\n\nPlease check your API key or try again.`);
-    conversationHistory.pop();
+    addMessage("bot", `⚠️ Error: ${err.message}\n\nPlease try again.`);
+    if (!hasImage) conversationHistory.pop();
   }
 
   isTyping = false;

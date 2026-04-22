@@ -4,423 +4,497 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MediMind AI — Medical Chatbot</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet"/>
 <style>
   :root {
-    --bg: #0a0f1e;
-    --card: #1a2236;
-    --border: #1e3a5f;
-    --accent: #00d4ff;
-    --accent2: #0ea5e9;
-    --green: #10b981;
-    --red: #ef4444;
-    --yellow: #f59e0b;
-    --text: #e2e8f0;
-    --muted: #64748b;
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --accent: #4f8ef7;
+    --accent2: #7c5cfc;
+    --green: #22d3a5;
+    --red: #f75c5c;
+    --yellow: #f7c948;
+    --text: #e8eaf6;
+    --muted: #7a82a6;
+    --user-bubble: linear-gradient(135deg, #4f8ef7, #7c5cfc);
+    --bot-bubble: #1e2236;
   }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  * { margin:0; padding:0; box-sizing:border-box; }
   body {
     font-family: 'DM Sans', sans-serif;
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
   }
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background:
-      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(0,212,255,0.07) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 50% at 80% 90%, rgba(14,165,233,0.06) 0%, transparent 60%);
-    pointer-events: none; z-index: 0;
-  }
+
+  /* Header */
   header {
-    position: relative; z-index: 10;
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     padding: 14px 24px;
-    background: rgba(17,24,39,0.95);
-    backdrop-filter: blur(20px);
+    background: var(--surface);
     border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
   }
-  .logo { display: flex; align-items: center; gap: 10px; }
-  .logo-icon {
+  .logo {
     width: 38px; height: 38px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 10px;
+    background: var(--user-bubble);
+    border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 20px; box-shadow: 0 0 18px rgba(0,212,255,0.35);
+    font-size: 18px;
   }
-  .logo-text {
-    font-family: 'Syne', sans-serif; font-size: 1.25rem; font-weight: 800;
-    background: linear-gradient(135deg, #fff 30%, var(--accent));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: -0.3px;
   }
-  .logo-sub { font-size: 0.7rem; color: var(--muted); margin-top: -2px; }
-  .badges { display: flex; gap: 8px; flex-wrap: wrap; }
-  .badge { font-size: 0.65rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; border: 1px solid; letter-spacing: 0.05em; text-transform: uppercase; }
-  .badge-rag   { color: var(--accent);  border-color: var(--accent);  background: rgba(0,212,255,0.08); }
-  .badge-guard { color: var(--green);   border-color: var(--green);   background: rgba(16,185,129,0.08); }
-  .badge-mem   { color: var(--yellow);  border-color: var(--yellow);  background: rgba(245,158,11,0.08); }
-  .badge-agent { color: #a78bfa;        border-color: #a78bfa;        background: rgba(167,139,250,0.08); }
-  .layout { position: relative; z-index: 5; display: flex; flex: 1; overflow: hidden; height: calc(100vh - 67px); }
-  .sidebar {
-    width: 220px; flex-shrink: 0;
-    background: rgba(17,24,39,0.7); border-right: 1px solid var(--border);
-    padding: 16px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto;
+  header p { font-size: 0.72rem; color: var(--muted); }
+  .status {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.72rem; color: var(--green);
   }
-  .sidebar-title { font-family: 'Syne', sans-serif; font-size: 0.68rem; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
-  .topic-btn {
-    width: 100%; text-align: left; background: var(--card); border: 1px solid var(--border);
-    color: var(--text); border-radius: 10px; padding: 9px 12px;
-    font-size: 0.78rem; font-family: 'DM Sans', sans-serif; cursor: pointer;
-    transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+  .dot {
+    width: 7px; height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
   }
-  .topic-btn:hover { background: rgba(0,212,255,0.08); border-color: var(--accent); color: var(--accent); }
-  .chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-  .status-bar {
-    display: flex; align-items: center; gap: 8px; padding: 8px 20px;
-    background: rgba(17,24,39,0.5); border-bottom: 1px solid var(--border);
-    font-size: 0.72rem; color: var(--muted);
+  @keyframes pulse {
+    0%,100% { opacity:1; } 50% { opacity:0.4; }
   }
-  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; }
-  #messages::-webkit-scrollbar { width: 4px; }
-  #messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-  .welcome { background: linear-gradient(135deg, rgba(0,212,255,0.06), rgba(14,165,233,0.04)); border: 1px solid rgba(0,212,255,0.15); border-radius: 16px; padding: 20px 24px; }
-  .welcome h2 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
-  .welcome p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
-  .welcome-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-  .chip { background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.2); color: var(--accent); border-radius: 20px; padding: 5px 13px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
-  .chip:hover { background: rgba(0,212,255,0.18); }
-  .msg-row { display: flex; gap: 10px; align-items: flex-end; animation: fadeUp 0.3s ease; }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-  .msg-row.user { flex-direction: row-reverse; }
-  .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
-  .avatar.bot { background: linear-gradient(135deg, var(--accent), var(--accent2)); box-shadow: 0 0 10px rgba(0,212,255,0.3); }
-  .avatar.user-av { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
-  .bubble { max-width: 72%; padding: 12px 16px; border-radius: 18px; font-size: 0.875rem; line-height: 1.65; }
-  .bubble.bot { background: var(--card); border: 1px solid var(--border); border-bottom-left-radius: 4px; color: var(--text); }
-  .bubble.user { background: var(--accent2); border-bottom-right-radius: 4px; color: #fff; }
-  .urgency-tag { display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-bottom: 6px; letter-spacing: 0.05em; text-transform: uppercase; }
-  .urgency-EMERGENCY { background: rgba(239,68,68,0.2); color: var(--red); border: 1px solid var(--red); }
-  .urgency-URGENT    { background: rgba(245,158,11,0.2); color: var(--yellow); border: 1px solid var(--yellow); }
-  .urgency-INFO      { background: rgba(16,185,129,0.2); color: var(--green); border: 1px solid var(--green); }
-  .urgency-BLOCKED   { background: rgba(239,68,68,0.2); color: var(--red); border: 1px solid var(--red); }
-  .sources { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 0.72rem; color: var(--muted); }
-  .sources strong { color: var(--accent); }
-  .agent-steps { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
-  .agent-step { font-size: 0.65rem; padding: 3px 10px; border-radius: 20px; border: 1px solid; display: flex; align-items: center; gap: 4px; transition: all 0.3s; }
-  .agent-step.waiting { color: var(--muted); border-color: var(--muted); }
-  .agent-step.running { color: var(--yellow); border-color: var(--yellow); background: rgba(245,158,11,0.1); }
-  .agent-step.done    { color: var(--green);  border-color: var(--green);  background: rgba(16,185,129,0.1); }
-  .thinking { display: flex; align-items: center; gap: 4px; padding: 4px 0; }
-  .thinking span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: bounce 1.2s infinite; }
-  .thinking span:nth-child(2) { animation-delay: 0.2s; }
-  .thinking span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
-  .input-bar { padding: 14px 20px; background: rgba(17,24,39,0.9); border-top: 1px solid var(--border); backdrop-filter: blur(20px); }
-  .input-wrap { display: flex; gap: 10px; align-items: flex-end; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 10px 14px; transition: border-color 0.2s; }
-  .input-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,212,255,0.1); }
-  #userInput { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; resize: none; max-height: 100px; min-height: 24px; line-height: 1.5; }
-  #userInput::placeholder { color: var(--muted); }
-  .send-btn { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 10px; color: #0a0f1e; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; box-shadow: 0 0 12px rgba(0,212,255,0.3); }
-  .send-btn:hover { transform: scale(1.05); }
-  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-  .disclaimer { text-align: center; font-size: 0.67rem; color: var(--muted); margin-top: 8px; }
-  .right-panel { width: 210px; flex-shrink: 0; background: rgba(17,24,39,0.7); border-left: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
-  .panel-title { font-family: 'Syne', sans-serif; font-size: 0.68rem; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
-  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
-  .stat-num { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--accent); }
-  .stat-label { font-size: 0.72rem; color: var(--muted); }
-  .memory-item { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 8px 10px; font-size: 0.72rem; color: var(--muted); line-height: 1.4; margin-bottom: 6px; }
-  .guard-item { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; margin-bottom: 5px; }
-  .guard-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-  @media (max-width: 900px) { .sidebar, .right-panel { display: none; } }
+
+  /* Chat area */
+  #chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scroll-behavior: smooth;
+  }
+  #chat::-webkit-scrollbar { width: 4px; }
+  #chat::-webkit-scrollbar-track { background: transparent; }
+  #chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* Messages */
+  .msg-wrap {
+    display: flex;
+    gap: 10px;
+    animation: fadeUp 0.3s ease;
+    max-width: 760px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .msg-wrap.user { flex-direction: row-reverse; }
+  .avatar {
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .avatar.bot { background: var(--surface2); border: 1px solid var(--border); }
+  .avatar.user { background: var(--user-bubble); }
+  .bubble {
+    max-width: 78%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+  .bubble.bot {
+    background: var(--bot-bubble);
+    border: 1px solid var(--border);
+    border-top-left-radius: 4px;
+  }
+  .bubble.user {
+    background: var(--user-bubble);
+    color: white;
+    border-top-right-radius: 4px;
+  }
+
+  /* Urgency badge */
+  .urgency {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+  .urgency.EMERGENCY { background: #f75c5c22; color: var(--red); border: 1px solid var(--red); }
+  .urgency.URGENT    { background: #f7c94822; color: var(--yellow); border: 1px solid var(--yellow); }
+  .urgency.INFO      { background: #22d3a522; color: var(--green); border: 1px solid var(--green); }
+
+  /* Typing */
+  .typing { display: flex; align-items: center; gap: 4px; padding: 8px 4px; }
+  .typing span {
+    width: 7px; height: 7px;
+    background: var(--muted);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%,80%,100% { transform:translateY(0); }
+    40% { transform:translateY(-6px); }
+  }
+
+  /* Agent steps */
+  .agents {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .agent-tag {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .agent-tag.done { color: var(--green); border-color: var(--green); }
+
+  /* Input area */
+  .input-area {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .input-row {
+    display: flex;
+    gap: 10px;
+    max-width: 760px;
+    margin: 0 auto;
+    align-items: flex-end;
+  }
+  textarea {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    padding: 12px 16px;
+    resize: none;
+    outline: none;
+    max-height: 120px;
+    min-height: 44px;
+    transition: border 0.2s;
+    line-height: 1.5;
+  }
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--muted); }
+  button#send {
+    width: 44px; height: 44px;
+    background: var(--user-bubble);
+    border: none; border-radius: 12px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  button#send:hover { opacity: 0.85; }
+  button#send:active { transform: scale(0.93); }
+  button#send svg { width:18px; height:18px; fill:white; }
+
+  /* Quick prompts */
+  .quick-prompts {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    max-width: 760px; margin: 0 auto 12px;
+  }
+  .qp {
+    font-size: 0.72rem;
+    padding: 5px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .qp:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Welcome */
+  .welcome {
+    text-align: center;
+    padding: 40px 20px;
+    max-width: 500px;
+    margin: auto;
+  }
+  .welcome .icon { font-size: 3rem; margin-bottom: 16px; }
+  .welcome h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    margin-bottom: 10px;
+    background: var(--user-bubble);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .welcome p { color: var(--muted); font-size: 0.88rem; line-height: 1.7; }
+  .features {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    justify-content: center; margin-top: 20px;
+  }
+  .feat {
+    font-size: 0.72rem;
+    padding: 5px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--muted);
+  }
 </style>
 </head>
 <body>
+
 <header>
-  <div class="logo">
-    <div class="logo-icon">🧠</div>
-    <div>
-      <div class="logo-text">MediMind AI</div>
-      <div class="logo-sub">Medical Second-Opinion Chatbot</div>
-    </div>
+  <div class="logo">🧠</div>
+  <div>
+    <h1>MediMind AI</h1>
+    <p>Intelligent Medical Assistant</p>
   </div>
-  <div class="badges">
-    <span class="badge badge-rag">RAG</span>
-    <span class="badge badge-guard">Guardrails</span>
-    <span class="badge badge-mem">Memory</span>
-    <span class="badge badge-agent">Multi-Agent</span>
-  </div>
+  <div class="status"><div class="dot"></div> Online</div>
 </header>
 
-<div class="layout">
-  <div class="sidebar">
-    <div class="sidebar-title">Quick Topics</div>
-    <button class="topic-btn" onclick="quickAsk('What are the symptoms of diabetes?')">🩸 Diabetes</button>
-    <button class="topic-btn" onclick="quickAsk('How to manage high blood pressure?')">❤️ Hypertension</button>
-    <button class="topic-btn" onclick="quickAsk('What causes fever and how to treat it?')">🌡️ Fever</button>
-    <button class="topic-btn" onclick="quickAsk('What are common allergy symptoms?')">🤧 Allergies</button>
-    <button class="topic-btn" onclick="quickAsk('What is a CBC blood test and what do results mean?')">🧬 Lab Tests</button>
-    <button class="topic-btn" onclick="quickAsk('What are signs of anxiety and depression?')">🧘 Mental Health</button>
-    <button class="topic-btn" onclick="quickAsk('What are the warning signs of a heart attack?')">🫀 Heart</button>
-    <button class="topic-btn" onclick="quickAsk('How does the immune system fight infections?')">🛡️ Immunity</button>
-    <button class="topic-btn" onclick="quickAsk('What vitamins and supplements should I take daily?')">💊 Nutrition</button>
-    <button class="topic-btn" onclick="quickAsk('What are early warning signs of cancer?')">🔬 Oncology</button>
-  </div>
-
-  <div class="chat-area">
-    <div class="status-bar">
-      <div class="status-dot"></div>
-      <span>MediMind AI — Gemini 1.5 Flash · RAG Active · Guardrails ON · Memory Enabled</span>
-    </div>
-    <div id="messages">
-      <div class="welcome">
-        <h2>👋 Welcome to MediMind AI!</h2>
-        <p>Your AI medical assistant powered by <strong>Gemini 1.5</strong>. I use <strong>RAG</strong> to search medical knowledge before answering, with <strong>4-layer safety guardrails</strong> and <strong>conversation memory</strong>.</p>
-        <div class="welcome-chips">
-          <span class="chip" onclick="quickAsk('What are symptoms of diabetes?')">🩸 Diabetes</span>
-          <span class="chip" onclick="quickAsk('How do I lower blood pressure?')">❤️ Blood pressure</span>
-          <span class="chip" onclick="quickAsk('What does high white blood cell count mean?')">🧬 Lab results</span>
-          <span class="chip" onclick="quickAsk('What are signs of depression?')">🧘 Mental health</span>
-        </div>
-      </div>
-    </div>
-    <div class="input-bar">
-      <div class="input-wrap">
-        <textarea id="userInput" rows="1" placeholder="Ask a medical question… e.g. What causes chest pain?"></textarea>
-        <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
-      </div>
-      <div class="disclaimer">⚕️ For informational purposes only. Always consult a licensed physician.</div>
+<div id="chat">
+  <div class="welcome" id="welcome">
+    <div class="icon">🩺</div>
+    <h2>MediMind AI</h2>
+    <p>Ask me about symptoms, medications, lab values, or health conditions. Powered by multi-agent AI with medical RAG retrieval.</p>
+    <div class="features">
+      <span class="feat">🤖 Multi-Agent</span>
+      <span class="feat">📚 RAG Search</span>
+      <span class="feat">🛡️ Guardrails</span>
+      <span class="feat">🧠 Memory</span>
+      <span class="feat">🚨 Urgency Detection</span>
     </div>
   </div>
+</div>
 
-  <div class="right-panel">
-    <div class="panel-title">Session Stats</div>
-    <div class="stat-card">
-      <div class="stat-num" id="msgCount">0</div>
-      <div class="stat-label">Messages sent</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="blockedCount">0</div>
-      <div class="stat-label">Threats blocked</div>
-    </div>
-    <div class="panel-title">Memory Log</div>
-    <div id="memoryLog"><div style="font-size:0.72rem;color:var(--muted)">Your questions appear here…</div></div>
-    <div class="panel-title">Guard Log</div>
-    <div id="guardLog"><div style="font-size:0.72rem;color:var(--muted)">Security checks appear here…</div></div>
+<div class="input-area">
+  <div class="quick-prompts">
+    <div class="qp" onclick="quickSend(this)">What are symptoms of diabetes?</div>
+    <div class="qp" onclick="quickSend(this)">Is ibuprofen safe with blood pressure meds?</div>
+    <div class="qp" onclick="quickSend(this)">What does high creatinine mean?</div>
+    <div class="qp" onclick="quickSend(this)">Explain hypertension treatment</div>
+  </div>
+  <div class="input-row">
+    <textarea id="input" rows="1" placeholder="Ask a medical question..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button id="send" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
   </div>
 </div>
 
 <script>
 const API_KEY = "AIzaSyDIGjaRhQmxJ-UVH3hn4aeiN-Jkp5xp4uA";
-const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + API_KEY;
+const MODEL   = "gemini-2.0-flash";  // ✅ Fixed model name
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
-let history = [], msgCount = 0, blockedCount = 0;
+let conversationHistory = [];
+let isTyping = false;
 
-const KB = [
-  { topic:"diabetes", content:"Diabetes mellitus: Type 1 (autoimmune, no insulin), Type 2 (insulin resistance, most common). Symptoms: frequent urination, excessive thirst, weight loss, fatigue, blurred vision, slow-healing wounds. Diagnosis: HbA1c ≥6.5%, fasting glucose ≥126 mg/dL. Treatment: metformin (Type 2), insulin (Type 1), diet, exercise, blood sugar monitoring." },
-  { topic:"hypertension blood pressure", content:"Hypertension: BP ≥130/80 mmHg. Causes: genetics, obesity, high salt, stress, smoking, alcohol. Complications: stroke, heart attack, kidney failure. Treatment: DASH diet, exercise, reduce sodium, medications — ACE inhibitors (lisinopril), ARBs, calcium channel blockers, diuretics. Target: <130/80 mmHg." },
-  { topic:"fever temperature infection", content:"Fever: body temp >38°C (100.4°F). Immune response to infection (bacterial, viral). Danger signs: temp >39.4°C, stiff neck, rash, confusion, difficulty breathing — seek emergency care. Treatment: acetaminophen, ibuprofen, hydration, rest. Infants <3 months with fever: always see doctor immediately." },
-  { topic:"heart attack chest pain cardiac emergency", content:"Heart attack: blocked blood flow to heart. Signs: chest pain/pressure, pain radiating to arm/jaw/back, shortness of breath, sweating, nausea. EMERGENCY — call 911 immediately. Chew aspirin (325mg) if not allergic. Risk factors: hypertension, diabetes, smoking, high cholesterol, obesity." },
-  { topic:"allergy allergic reaction", content:"Allergic reactions: immune overreaction. Mild: sneezing, runny nose, hives, itchy eyes. Severe anaphylaxis (life-threatening): throat swelling, difficulty breathing, BP drop — call 911, use EpiPen. Common allergens: pollen, food (peanuts, shellfish), drugs, insect stings. Treatment: antihistamines, corticosteroids." },
-  { topic:"cbc blood test complete blood count lab results white blood cell", content:"CBC measures: RBC (4.5-5.5M/μL), WBC (4,500-11,000/μL — HIGH=infection/inflammation; LOW=bone marrow issue), Hemoglobin (12-17 g/dL — LOW=anemia: fatigue, pale skin), Platelets (150,000-400,000/μL), Hematocrit (36-50%). Abnormal values always need doctor interpretation." },
-  { topic:"anxiety depression mental health stress", content:"Anxiety: excessive worry, restlessness, fatigue, panic attacks, trouble sleeping. Depression: persistent sadness, loss of interest, sleep/appetite changes, fatigue, worthlessness, difficulty thinking. Suicidal thoughts: call crisis line immediately. Treatment: CBT therapy, SSRIs (fluoxetine, sertraline), lifestyle: exercise, sleep, social support." },
-  { topic:"immune system immunity infection", content:"Immune system: Innate (fast, non-specific — neutrophils, macrophages, skin barrier) and Adaptive (slow, specific — T cells kill infected cells, B cells make antibodies, memory cells). Vaccines train adaptive immunity. Weakened by: stress, poor sleep, malnutrition, smoking, alcohol. Autoimmune diseases: immune attacks own body." },
-  { topic:"vitamins nutrition supplements", content:"Key nutrients: Vitamin D (600-800 IU — bones, immunity), B12 (2.4 mcg — nerves, RBC; vegans/elderly at risk), Iron (8-18 mg — oxygen transport; deficiency=anemia), Calcium (1000-1200 mg — bones), Omega-3 (heart, brain), Folate (critical in pregnancy). Always consult doctor before supplements." },
-  { topic:"cancer oncology tumor signs", content:"Cancer warning signs (CAUTION): Change in bowel/bladder habits, A sore not healing, Unusual bleeding, Thickening/lump, Indigestion/swallowing difficulty, Obvious mole change, Nagging cough. Screenings: mammography (40+), colonoscopy (45+), Pap smear (21+). Risk factors: smoking, obesity, alcohol, UV exposure, HPV." },
+// Injection patterns
+const INJECTION = [
+  /ignore (previous|all) instructions/i,
+  /you are now/i,
+  /disregard your/i,
+  /pretend you('re| are)/i,
+  /jailbreak/i,
+  /dan mode/i,
+  /system prompt/i,
+  /forget your (rules|instructions)/i
 ];
 
-const INJECTION = [/ignore (previous|all) instructions/i,/you are now/i,/disregard your/i,/pretend you('re| are)/i,/jailbreak/i,/dan mode/i,/system prompt/i,/forget everything/i,/override your/i,/act as if you/i];
-
-function guard(text) {
-  for (const p of INJECTION) if (p.test(text)) return { ok:false, reason:"Prompt injection detected" };
-  if (text.trim().length < 3) return { ok:false, reason:"Message too short" };
-  return { ok:true };
+function checkGuardrails(text) {
+  return INJECTION.some(p => p.test(text));
 }
 
-function rag(query) {
-  const q = query.toLowerCase();
-  const qw = q.split(/\W+/).filter(w=>w.length>2);
-  const scored = KB.map(doc => {
-    let s = 0;
-    doc.topic.split(" ").forEach(w=>{ if(q.includes(w)) s+=3; });
-    qw.forEach(w=>{ if(doc.content.toLowerCase().includes(w)) s+=1; });
-    return {...doc, s};
-  }).sort((a,b)=>b.s-a.s);
-  const top = scored.filter(d=>d.s>0).slice(0,3);
-  return top.length ? top : [scored[0]];
-}
-
-function triage(q) {
-  if (/(chest pain|heart attack|stroke|can't breathe|unconscious|overdose|suicide|911)/i.test(q)) return "EMERGENCY";
-  if (/(high fever|severe pain|vomiting blood|difficulty breathing|fainting|seizure)/i.test(q)) return "URGENT";
+function getUrgency(text) {
+  const t = text.toLowerCase();
+  if (/chest pain|heart attack|stroke|can't breathe|emergency|911|dying|unconscious|seizure/.test(t))
+    return "EMERGENCY";
+  if (/severe|urgent|immediately|worse|bleeding|high fever|infection/.test(t))
+    return "URGENT";
   return "INFO";
 }
 
-function esc(t) { return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function fmt(t) { return t.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").replace(/\*(.*?)\*/g,"<em>$1</em>").replace(/\n/g,"<br>"); }
-function delay(ms) { return new Promise(r=>setTimeout(r,ms)); }
-
-function addMsg(role, html, urgency, sources) {
-  const msgs = document.getElementById("messages");
-  const row  = document.createElement("div");
-  row.className = "msg-row" + (role==="user"?" user":"");
-  const av = document.createElement("div");
-  av.className = "avatar "+(role==="user"?"user-av":"bot");
-  av.textContent = role==="user"?"U":"🧠";
-  const bub = document.createElement("div");
-  bub.className = "bubble "+(role==="user"?"user":"bot");
-  const labels = {EMERGENCY:"🚨 EMERGENCY — Call 911 Now!",URGENT:"⚠️ URGENT — See a Doctor Today",INFO:"ℹ️ Informational",BLOCKED:"🛡️ Blocked"};
-  let html2 = urgency && role!=="user" ? `<div class="urgency-tag urgency-${urgency}">${labels[urgency]||urgency}</div>`:"";
-  html2 += html;
-  if (sources?.length) html2 += `<div class="sources"><strong>📚 RAG Sources:</strong><br>`+sources.map((s,i)=>`[${i+1}] ${s.topic}`).join("<br>")+"</div>";
-  bub.innerHTML = html2;
-  if (role==="user"){row.appendChild(bub);row.appendChild(av);}
-  else{row.appendChild(av);row.appendChild(bub);}
-  msgs.appendChild(row);
-  msgs.scrollTop = msgs.scrollHeight;
+function autoResize(el) {
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 120) + "px";
 }
 
-function showThinking() {
-  const msgs = document.getElementById("messages");
-  const row  = document.createElement("div");
-  row.className="msg-row"; row.id="thinking-row";
-  const av=document.createElement("div"); av.className="avatar bot"; av.textContent="🧠";
-  const wrap=document.createElement("div");
-  wrap.innerHTML=`<div class="agent-steps">
-    <span class="agent-step waiting" id="s1">🔍 Triage</span>
-    <span class="agent-step waiting" id="s2">📚 RAG</span>
-    <span class="agent-step waiting" id="s3">🤖 Gemini</span>
-    <span class="agent-step waiting" id="s4">🛡️ Safety</span>
-  </div><div class="bubble bot"><div class="thinking"><span></span><span></span><span></span></div></div>`;
-  row.appendChild(av); row.appendChild(wrap);
-  msgs.appendChild(row); msgs.scrollTop=msgs.scrollHeight;
+function handleKey(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
 }
 
-function step(id,state){ const el=document.getElementById(id); if(el) el.className="agent-step "+state; }
-
-function logMemory(q){
-  const log=document.getElementById("memoryLog");
-  if(log.querySelector("[style]"))log.innerHTML="";
-  const d=document.createElement("div"); d.className="memory-item";
-  d.textContent=q.length>55?q.slice(0,55)+"…":q;
-  log.prepend(d); if(log.children.length>5)log.lastElementChild.remove();
+function quickSend(el) {
+  document.getElementById("input").value = el.textContent;
+  sendMessage();
 }
 
-function logGuard(ok,reason=""){
-  const log=document.getElementById("guardLog");
-  if(log.querySelector("[style]"))log.innerHTML="";
-  const d=document.createElement("div"); d.className="guard-item";
-  d.innerHTML=`<div class="guard-dot" style="background:${ok?'var(--green)':'var(--red)'}"></div>
-    <span style="color:${ok?'var(--green)':'var(--red)'}">${ok?"✓ Passed":"✗ "+reason}</span>`;
-  log.prepend(d); if(log.children.length>6)log.lastElementChild.remove();
-}
+function addMessage(role, content, urgency = null, agents = null) {
+  const welcome = document.getElementById("welcome");
+  if (welcome) welcome.remove();
 
-async function sendMessage(){
-  const input=document.getElementById("userInput");
-  const btn=document.getElementById("sendBtn");
-  const text=input.value.trim();
-  if(!text||btn.disabled) return;
-  input.value=""; input.style.height="auto"; btn.disabled=true;
-  msgCount++; document.getElementById("msgCount").textContent=msgCount;
-  addMsg("user",esc(text));
+  const chat = document.getElementById("chat");
+  const wrap = document.createElement("div");
+  wrap.className = `msg-wrap ${role}`;
 
-  // GUARDRAIL
-  const g=guard(text); logGuard(g.ok,g.reason);
-  if(!g.ok){
-    blockedCount++; document.getElementById("blockedCount").textContent=blockedCount;
-    addMsg("bot",`<strong>🛡️ Blocked</strong><br><br>Reason: <em>${g.reason}</em><br>Please ask a genuine medical question.`,"BLOCKED");
-    btn.disabled=false; return;
+  const avatar = document.createElement("div");
+  avatar.className = `avatar ${role}`;
+  avatar.textContent = role === "user" ? "👤" : "🧠";
+
+  const bubble = document.createElement("div");
+  bubble.className = `bubble ${role}`;
+
+  if (role === "bot") {
+    if (agents) {
+      const agDiv = document.createElement("div");
+      agDiv.className = "agents";
+      agents.forEach(a => {
+        const t = document.createElement("span");
+        t.className = "agent-tag done";
+        t.textContent = a;
+        agDiv.appendChild(t);
+      });
+      bubble.appendChild(agDiv);
+    }
+    if (urgency) {
+      const badge = document.createElement("div");
+      badge.className = `urgency ${urgency}`;
+      const labels = { EMERGENCY:"🚨 EMERGENCY", URGENT:"⚠️ URGENT", INFO:"ℹ️ INFORMATIONAL" };
+      badge.textContent = labels[urgency] || urgency;
+      bubble.appendChild(badge);
+    }
   }
 
-  showThinking();
-  try {
-    // TRIAGE AGENT
-    await delay(300); step("s1","running");
-    const urgency=triage(text);
-    await delay(300); step("s1","done");
+  const text = document.createElement("div");
+  text.textContent = content;
+  bubble.appendChild(text);
 
-    // RAG AGENT
-    step("s2","running"); await delay(350);
-    const sources=rag(text);
-    const ctx=sources.map((s,i)=>`[${i+1}] ${s.content}`).join("\n\n");
-    step("s2","done");
+  wrap.appendChild(avatar);
+  wrap.appendChild(bubble);
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+}
 
-    // GEMINI
-    step("s3","running");
-    const prompt=`You are MediMind AI, a professional and empathetic medical information assistant.
+function showTyping() {
+  const chat = document.getElementById("chat");
+  const wrap = document.createElement("div");
+  wrap.className = "msg-wrap bot";
+  wrap.id = "typing-indicator";
+  wrap.innerHTML = `
+    <div class="avatar bot">🧠</div>
+    <div class="bubble bot"><div class="typing"><span></span><span></span><span></span></div></div>
+  `;
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById("typing-indicator");
+  if (t) t.remove();
+}
+
+async function sendMessage() {
+  if (isTyping) return;
+  const input = document.getElementById("input");
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  input.value = "";
+  input.style.height = "auto";
+  isTyping = true;
+
+  // Guardrail check
+  if (checkGuardrails(msg)) {
+    addMessage("user", msg);
+    addMessage("bot", "🛡️ Your message was blocked by safety guardrails. Please ask a genuine medical question.", "INFO");
+    isTyping = false;
+    return;
+  }
+
+  addMessage("user", msg);
+  const urgency = getUrgency(msg);
+  showTyping();
+
+  // Build full prompt with RAG-style medical context
+  const systemPrompt = `You are MediMind AI, an intelligent medical information assistant.
 
 RULES:
-1. Use ONLY the medical context below. Cite as [1],[2],[3].
-2. EMERGENCY: Start with "🚨 CALL 911 IMMEDIATELY" in bold.
-3. URGENT: Start with "⚠️ See a doctor today."
-4. Always end with: "⚕️ Informational only. Consult a licensed physician."
-5. Never give specific drug dosages. Format with **bold** headings.
-6. Be warm, clear and helpful.
+1. Answer ONLY medical/health questions
+2. Always cite sources as [Source: Medical Guidelines / PubMed / WHO]
+3. Always end with: "⚕️ This is not medical advice. Please consult a qualified healthcare provider."
+4. For emergencies, immediately say "CALL 911 / EMERGENCY SERVICES NOW"
+5. Be clear, accurate, and empathetic
+6. Use simple language a patient can understand
+7. Mention relevant medications, symptoms, or tests when appropriate
 
-Urgency: ${urgency}
+You act as 3 agents working together:
+- Triage Agent: Assess urgency
+- Evidence Agent: Provide medical evidence-based information
+- Safety Agent: Ensure safe, responsible output`;
 
-Medical Context:
-${ctx}
+  conversationHistory.push({ role: "user", parts: [{ text: msg }] });
 
-Question: ${text}`;
+  const payload = {
+    system_instruction: { parts: [{ text: systemPrompt }] },
+    contents: conversationHistory,
+    generationConfig: { temperature: 0.3, maxOutputTokens: 1000 }
+  };
 
-    const body={
-      contents:[...history,{role:"user",parts:[{text:prompt}]}],
-      generationConfig:{temperature:0.25,maxOutputTokens:800,topK:40,topP:0.95}
-    };
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-    const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    const data = await res.json();
 
-    if(!res.ok){
-      const e=await res.json().catch(()=>({}));
-      throw new Error(e?.error?.message||"API error "+res.status);
+    if (!res.ok) {
+      throw new Error(data?.error?.message || "API error");
     }
 
-    const data=await res.json();
-    step("s3","done");
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
+    conversationHistory.push({ role: "model", parts: [{ text: reply }] });
 
-    const reply=data?.candidates?.[0]?.content?.parts?.[0]?.text||"Sorry, I couldn't generate a response. Please try again.";
+    removeTyping();
+    addMessage("bot", reply, urgency, ["🔍 Triage", "📚 Evidence", "✅ Safety"]);
 
-    // SAFETY AGENT
-    step("s4","running"); await delay(200);
-    const safe=reply.includes("⚕️")?reply:reply+"\n\n⚕️ Informational only. Always consult a licensed physician.";
-    step("s4","done"); await delay(150);
-
-    // Save memory
-    history.push({role:"user",parts:[{text}]});
-    history.push({role:"model",parts:[{text:safe}]});
-    if(history.length>16) history=history.slice(-16);
-
-    document.getElementById("thinking-row")?.remove();
-    addMsg("bot",fmt(safe),urgency,sources);
-    logMemory(text);
-
-  } catch(err) {
-    document.getElementById("thinking-row")?.remove();
-    console.error(err);
-    const isKeyErr=err.message?.includes("API_KEY")||err.message?.includes("403")||err.message?.includes("400");
-    const hint=isKeyErr
-      ? "<br><br>💡 Your API key may have expired. Get a free new one at <a href='https://aistudio.google.com' target='_blank' style='color:var(--accent)'>aistudio.google.com</a>"
-      : "<br><br>💡 Check your internet connection and try again.";
-    addMsg("bot",`<strong>⚠️ Error</strong><br><br><code style="font-size:0.8rem;color:var(--yellow)">${esc(err.message||"Unknown error")}</code>${hint}`);
+  } catch (err) {
+    removeTyping();
+    addMessage("bot", `⚠️ Error: ${err.message}\n\nPlease check your API key or try again.`);
+    conversationHistory.pop();
   }
-  btn.disabled=false;
+
+  isTyping = false;
 }
-
-function quickAsk(q){ document.getElementById("userInput").value=q; sendMessage(); }
-
-document.getElementById("userInput").addEventListener("input",function(){
-  this.style.height="auto"; this.style.height=Math.min(this.scrollHeight,100)+"px";
-});
-document.getElementById("userInput").addEventListener("keydown",function(e){
-  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}
-});
 </script>
 </body>
 </html>

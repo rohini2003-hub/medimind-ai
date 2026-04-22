@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MediMind AI — Medical Chatbot</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --card: #1a2236;
+    --border: #1e3a5f;
+    --accent: #00d4ff;
+    --accent2: #0ea5e9;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --user-bubble: #0ea5e9;
+    --bot-bubble: #1a2236;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(0,212,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 90%, rgba(14,165,233,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    background: rgba(17,24,39,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 0 18px rgba(0,212,255,0.35);
+  }
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 30%, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .logo-sub { font-size: 0.7rem; color: var(--muted); margin-top: -2px; }
+
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .badge-rag   { color: var(--accent);  border-color: var(--accent);  background: rgba(0,212,255,0.08); }
+  .badge-guard { color: var(--green);   border-color: var(--green);   background: rgba(16,185,129,0.08); }
+  .badge-mem   { color: var(--yellow);  border-color: var(--yellow);  background: rgba(245,158,11,0.08); }
+  .badge-agent { color: #a78bfa;        border-color: #a78bfa;        background: rgba(167,139,250,0.08); }
+
+  /* ── LAYOUT ── */
+  .layout {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 67px);
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: rgba(17,24,39,0.6);
+    border-right: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+  }
+  .sidebar-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .topic-btn {
+    width: 100%;
+    text-align: left;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 0.8rem;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .topic-btn:hover {
+    background: rgba(0,212,255,0.08);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .topic-icon { font-size: 1rem; }
+
+  /* ── CHAT AREA ── */
+  .chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: rgba(17,24,39,0.5);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── MESSAGES ── */
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scroll-behavior: smooth;
+  }
+  #messages::-webkit-scrollbar { width: 4px; }
+  #messages::-webkit-scrollbar-track { background: transparent; }
+  #messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* Welcome card */
+  .welcome {
+    background: linear-gradient(135deg, rgba(0,212,255,0.06), rgba(14,165,233,0.04));
+    border: 1px solid rgba(0,212,255,0.15);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 8px;
+  }
+  .welcome h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .welcome p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+  .welcome-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .chip {
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.2);
+    color: var(--accent);
+    border-radius: 20px;
+    padding: 5px 13px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .chip:hover { background: rgba(0,212,255,0.18); }
+
+  /* Message rows */
+  .msg-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    animation: fadeUp 0.3s ease;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  .msg-row.user { flex-direction: row-reverse; }
+
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+  }
+  .avatar.bot {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    box-shadow: 0 0 10px rgba(0,212,255,0.3);
+  }
+  .avatar.user-av {
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  }
+
+  .bubble {
+    max-width: 70%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 0.875rem;
+    line-height: 1.65;
+  }
+  .bubble.bot {
+    background: var(--bot-bubble);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+    color: var(--text);
+  }
+  .bubble.user {
+    background: var(--user-bubble);
+    border-bottom-right-radius: 4px;
+    color: #fff;
+  }
+
+  /* Urgency tag */
+  .urgency-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .urgency-EMERGENCY { background: rgba(239,68,68,0.2); color: var(--red); border: 1px solid var(--red); }
+  .urgency-URGENT    { background: rgba(245,158,11,0.2); color: var(--yellow); border: 1px solid var(--yellow); }
+  .urgency-INFO      { background: rgba(16,185,129,0.2); color: var(--green); border: 1px solid var(--green); }
+  .urgency-BLOCKED   { background: rgba(239,68,68,0.2); color: var(--red); border: 1px solid var(--red); }
+
+  /* Sources */
+  .sources {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .sources strong { color: var(--accent); font-size: 0.7rem; }
+
+  /* Thinking animation */
+  .thinking { display: flex; align-items: center; gap: 4px; padding: 4px 0; }
+  .thinking span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    animation: bounce 1.2s infinite;
+  }
+  .thinking span:nth-child(2) { animation-delay: 0.2s; }
+  .thinking span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+  /* ── AGENT STEPS ── */
+  .agent-steps {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .agent-step {
+    font-size: 0.65rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.3s;
+  }
+  .agent-step.waiting  { color: var(--muted); border-color: var(--muted); background: transparent; }
+  .agent-step.running  { color: var(--yellow); border-color: var(--yellow); background: rgba(245,158,11,0.1); }
+  .agent-step.done     { color: var(--green);  border-color: var(--green);  background: rgba(16,185,129,0.1); }
+
+  /* ── INPUT BAR ── */
+  .input-bar {
+    padding: 14px 20px;
+    background: rgba(17,24,39,0.8);
+    border-top: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+  }
+  .input-wrap {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 10px 14px;
+    transition: border-color 0.2s;
+  }
+  .input-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,212,255,0.1); }
+  #userInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    resize: none;
+    max-height: 100px;
+    min-height: 24px;
+    line-height: 1.5;
+  }
+  #userInput::placeholder { color: var(--muted); }
+  .send-btn {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 10px;
+    color: var(--bg);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    box-shadow: 0 0 12px rgba(0,212,255,0.3);
+  }
+  .send-btn:hover { transform: scale(1.05); box-shadow: 0 0 18px rgba(0,212,255,0.5); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .disclaimer {
+    text-align: center;
+    font-size: 0.67rem;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel {
+    width: 220px;
+    flex-shrink: 0;
+    background: rgba(17,24,39,0.6);
+    border-left: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+  }
+  .panel-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+  }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--accent);
+  }
+  .stat-label { font-size: 0.72rem; color: var(--muted); }
+
+  .memory-log {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .memory-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.4;
+    border-left: 3px solid var(--accent);
+  }
+
+  .guard-log {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .guard-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+  }
+  .guard-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  @media (max-width: 900px) {
+    .sidebar, .right-panel { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🧠</div>
+    <div>
+      <div class="logo-text">MediMind AI</div>
+      <div class="logo-sub">Medical Second-Opinion Chatbot</div>
+    </div>
+  </div>
+  <div class="badges">
+    <span class="badge badge-rag">RAG</span>
+    <span class="badge badge-guard">Guardrails</span>
+    <span class="badge badge-mem">Memory</span>
+    <span class="badge badge-agent">Multi-Agent</span>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-title">Topics</div>
+    <button class="topic-btn" onclick="quickAsk('What are the symptoms of diabetes?')"><span class="topic-icon">🩸</span> Diabetes</button>
+    <button class="topic-btn" onclick="quickAsk('How to manage high blood pressure?')"><span class="topic-icon">❤️</span> Hypertension</button>
+    <button class="topic-btn" onclick="quickAsk('What causes fever and how to treat it?')"><span class="topic-icon">🌡️</span> Fever</button>
+    <button class="topic-btn" onclick="quickAsk('What are common allergy symptoms?')"><span class="topic-icon">🤧</span> Allergies</button>
+    <button class="topic-btn" onclick="quickAsk('What is a CBC blood test?')"><span class="topic-icon">🧬</span> Lab Tests</button>
+    <button class="topic-btn" onclick="quickAsk('What are signs of anxiety disorder?')"><span class="topic-icon">🧘</span> Mental Health</button>
+    <button class="topic-btn" onclick="quickAsk('What are symptoms of heart attack?')"><span class="topic-icon">🫀</span> Heart</button>
+    <button class="topic-btn" onclick="quickAsk('How does the immune system work?')"><span class="topic-icon">🛡️</span> Immunity</button>
+    <button class="topic-btn" onclick="quickAsk('What vitamins should I take daily?')"><span class="topic-icon">💊</span> Nutrition</button>
+    <button class="topic-btn" onclick="quickAsk('What are early signs of cancer?')"><span class="topic-icon">🔬</span> Oncology</button>
+  </div>
+
+  <!-- CHAT -->
+  <div class="chat-area">
+    <div class="status-bar">
+      <div class="status-dot"></div>
+      <span>MediMind AI is online — Gemini 1.5 Pro · RAG enabled · Guardrails active</span>
+    </div>
+
+    <div id="messages">
+      <div class="welcome">
+        <h2>👋 Welcome to MediMind AI</h2>
+        <p>I'm your intelligent medical assistant. I use <strong>RAG</strong> (Retrieval-Augmented Generation) to ground my answers in medical knowledge, with <strong>multi-agent reasoning</strong> and <strong>safety guardrails</strong> built in.</p>
+        <div class="welcome-chips">
+          <span class="chip" onclick="quickAsk('What are symptoms of diabetes?')">🩸 Diabetes symptoms</span>
+          <span class="chip" onclick="quickAsk('How do I lower blood pressure naturally?')">❤️ Blood pressure</span>
+          <span class="chip" onclick="quickAsk('What does a high white blood cell count mean?')">🧬 Lab results</span>
+          <span class="chip" onclick="quickAsk('What are signs of depression?')">🧘 Mental health</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-bar">
+      <div class="input-wrap">
+        <textarea id="userInput" rows="1" placeholder="Ask a medical question… (e.g. What causes chest pain?)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+      </div>
+      <div class="disclaimer">⚕️ For informational purposes only. Always consult a licensed physician for medical advice.</div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="panel-title">Session Stats</div>
+    <div class="stat-card">
+      <div class="stat-num" id="msgCount">0</div>
+      <div class="stat-label">Messages sent</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="blockedCount">0</div>
+      <div class="stat-label">Threats blocked</div>
+    </div>
+
+    <div class="panel-title">Memory Log</div>
+    <div class="memory-log" id="memoryLog">
+      <div style="font-size:0.72rem;color:var(--muted)">Conversation memory will appear here…</div>
+    </div>
+
+    <div class="panel-title">Guard Log</div>
+    <div class="guard-log" id="guardLog">
+      <div style="font-size:0.72rem;color:var(--muted)">Security checks appear here…</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const API_KEY = "AIzaSyDIGjaRhQmxJ-UVH3hn4aeiN-Jkp5xp4uA";
+const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
+
+// ── STATE ───────────────────────────────────────────────────────────────────
+let conversationHistory = [];
+let msgCount    = 0;
+let blockedCount = 0;
+
+// ── MEDICAL KNOWLEDGE BASE (RAG simulation) ──────────────────────────────────
+const medicalKB = [
+  { topic:"diabetes", content:"Diabetes mellitus is characterized by hyperglycemia. Type 1 is autoimmune, Type 2 is insulin resistance. Symptoms: polyuria, polydipsia, polyphagia, fatigue, blurred vision. HbA1c ≥6.5% is diagnostic. Management: metformin, insulin, lifestyle changes." },
+  { topic:"hypertension", content:"Hypertension (BP ≥130/80 mmHg) is a major cardiovascular risk factor. Causes: obesity, salt intake, stress, genetics. Treatment: ACE inhibitors, ARBs, calcium channel blockers, lifestyle changes including DASH diet, exercise, sodium restriction." },
+  { topic:"fever", content:"Fever (temp >38°C/100.4°F) is a host defense mechanism. Common causes: bacterial/viral infections, inflammation, medications. Management: antipyretics (acetaminophen, ibuprofen), hydration. Danger signs: temp >39.4°C, stiff neck, rash, confusion." },
+  { topic:"heart attack", content:"Myocardial infarction presents with chest pain/pressure, radiating to arm/jaw, diaphoresis, dyspnea, nausea. Risk factors: hypertension, diabetes, smoking, hyperlipidemia. Emergency management: aspirin, nitroglycerin, PCI. Call 911 immediately." },
+  { topic:"allergy", content:"Allergic reactions range from mild (rhinitis, urticaria) to anaphylaxis. IgE-mediated responses trigger histamine release. Common allergens: pollen, dust mites, food, medications. Treatment: antihistamines, corticosteroids, epinephrine for anaphylaxis." },
+  { topic:"cbc blood test", content:"Complete Blood Count measures: RBC (normal: 4.5-5.5M/μL), WBC (4,500-11,000/μL), Hemoglobin (12-17 g/dL), Hematocrit (36-50%), Platelets (150,000-400,000/μL). High WBC suggests infection/inflammation. Low hemoglobin indicates anemia." },
+  { topic:"anxiety depression mental health", content:"Anxiety disorders affect 18% of adults. Symptoms: excessive worry, restlessness, fatigue, difficulty concentrating. Depression: persistent sadness, anhedonia, sleep changes, appetite changes. Treatment: CBT, SSRIs, SNRIs, lifestyle modifications, therapy." },
+  { topic:"immune system", content:"The immune system includes innate (neutrophils, macrophages, NK cells) and adaptive (T cells, B cells, antibodies) immunity. Vaccines train adaptive immunity. Immunodeficiency increases infection risk. Autoimmune diseases occur when immune system attacks self." },
+  { topic:"vitamins nutrition", content:"Essential vitamins: Vitamin D (bone health, 600-800 IU/day), B12 (neurological function), Iron (oxygen transport), Calcium (bone density), Omega-3 (cardiovascular health). Deficiencies common in: vegans (B12), elderly (D, B12), menstruating women (iron)." },
+  { topic:"cancer oncology", content:"Cancer involves uncontrolled cell growth. Early warning signs (CAUTION): Change in bowel habits, A sore that doesn't heal, Unusual bleeding, Thickening lump, Indigestion, Obvious change in mole, Nagging cough. Screening: mammography, colonoscopy, PSA, Pap smear." },
+];
+
+// ── GUARDRAILS ───────────────────────────────────────────────────────────────
+const INJECTION_PATTERNS = [
+  /ignore (previous|all) instructions/i,
+  /you are now/i,
+  /disregard your/i,
+  /pretend you('re| are)/i,
+  /jailbreak/i,
+  /dan mode/i,
+  /system prompt/i,
+  /forget everything/i,
+  /new persona/i,
+  /act as if/i,
+];
+
+function checkGuardrails(text) {
+  for (const pattern of INJECTION_PATTERNS) {
+    if (pattern.test(text)) {
+      return { safe: false, reason: "Prompt injection detected" };
+    }
+  }
+  if (text.length < 3) return { safe: false, reason: "Too short" };
+  if (text.length > 1000) return { safe: false, reason: "Too long" };
+  return { safe: true };
+}
+
+function addGuardLog(text, safe, reason) {
+  const log = document.getElementById("guardLog");
+  if (log.children[0]?.style?.color === "var(--muted)") log.innerHTML = "";
+  const item = document.createElement("div");
+  item.className = "guard-item";
+  item.innerHTML = `
+    <div class="guard-dot" style="background:${safe ? 'var(--green)' : 'var(--red)'}"></div>
+    <span style="color:${safe ? 'var(--green)' : 'var(--red)'};font-size:0.68rem">
+      ${safe ? "✓ Passed" : "✗ " + reason}
+    </span>`;
+  log.prepend(item);
+  if (log.children.length > 6) log.lastElementChild.remove();
+}
+
+// ── RAG RETRIEVER ────────────────────────────────────────────────────────────
+function retrieveContext(query) {
+  const q = query.toLowerCase();
+  const scored = medicalKB.map(doc => {
+    const words = doc.topic.split(" ");
+    let score = words.filter(w => q.includes(w)).length;
+    if (q.includes(doc.topic)) score += 3;
+    // keyword matching
+    const contentWords = doc.content.toLowerCase().split(/\W+/);
+    const queryWords   = q.split(/\W+/);
+    score += queryWords.filter(w => w.length > 3 && contentWords.includes(w)).length * 0.5;
+    return { ...doc, score };
+  });
+  scored.sort((a, b) => b.score - a.score);
+  const top = scored.slice(0, 3).filter(d => d.score > 0);
+  return top.length ? top : [scored[0]];
+}
+
+// ── TRIAGE AGENT ─────────────────────────────────────────────────────────────
+function triageQuery(query) {
+  const emergency = /(chest pain|heart attack|stroke|can't breathe|unconscious|severe bleeding|911|emergency|overdose|suicide)/i;
+  const urgent    = /(high fever|severe pain|vomiting blood|difficulty breathing|sudden vision|fainting)/i;
+  if (emergency.test(query)) return "EMERGENCY";
+  if (urgent.test(query))    return "URGENT";
+  return "INFO";
+}
+
+// ── MEMORY ───────────────────────────────────────────────────────────────────
+function updateMemory(userMsg, botResponse) {
+  const log = document.getElementById("memoryLog");
+  if (log.children[0]?.style?.color === "var(--muted)") log.innerHTML = "";
+  const item = document.createElement("div");
+  item.className = "memory-item";
+  item.textContent = "Q: " + userMsg.substring(0, 50) + (userMsg.length > 50 ? "…" : "");
+  log.prepend(item);
+  if (log.children.length > 5) log.lastElementChild.remove();
+}
+
+// ── RENDER HELPERS ───────────────────────────────────────────────────────────
+function addMessage(role, html, urgency = null, sources = null) {
+  const messages = document.getElementById("messages");
+  const row = document.createElement("div");
+  row.className = "msg-row " + (role === "user" ? "user" : "");
+
+  const avatar = document.createElement("div");
+  avatar.className = "avatar " + (role === "user" ? "user-av" : "bot");
+  avatar.textContent = role === "user" ? "U" : "🧠";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble " + (role === "user" ? "user" : "bot");
+
+  let inner = "";
+  if (urgency && role !== "user") {
+    inner += `<div class="urgency-tag urgency-${urgency}">${
+      urgency === "EMERGENCY" ? "🚨 EMERGENCY" :
+      urgency === "URGENT"    ? "⚠️ URGENT" :
+      urgency === "BLOCKED"   ? "🛡️ BLOCKED" : "ℹ️ INFORMATIONAL"
+    }</div>`;
+  }
+  inner += html;
+  if (sources && sources.length) {
+    inner += `<div class="sources"><strong>📚 Sources used (RAG):</strong><br>` +
+      sources.map((s,i) => `[${i+1}] Medical Knowledge Base — <em>${s.topic}</em>`).join("<br>") + "</div>";
+  }
+  bubble.innerHTML = inner;
+
+  if (role === "user") { row.appendChild(bubble); row.appendChild(avatar); }
+  else                 { row.appendChild(avatar);  row.appendChild(bubble); }
+
+  messages.appendChild(row);
+  messages.scrollTop = messages.scrollHeight;
+  return bubble;
+}
+
+function addThinking() {
+  const messages = document.getElementById("messages");
+  const row = document.createElement("div");
+  row.className = "msg-row";
+  row.id = "thinking-row";
+
+  // Agent steps
+  const stepsDiv = document.createElement("div");
+  stepsDiv.innerHTML = `
+    <div class="agent-steps" id="agentSteps">
+      <span class="agent-step waiting" id="step-triage">🔍 Triage Agent</span>
+      <span class="agent-step waiting" id="step-rag">📚 Evidence Agent</span>
+      <span class="agent-step waiting" id="step-gen">🤖 Gemini LLM</span>
+      <span class="agent-step waiting" id="step-safety">🛡️ Safety Agent</span>
+    </div>
+    <div class="bubble bot"><div class="thinking"><span></span><span></span><span></span></div></div>`;
+  row.appendChild(stepsDiv);
+  messages.appendChild(row);
+  messages.scrollTop = messages.scrollHeight;
+  return row;
+}
+
+function setStep(id, state) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = "agent-step " + state;
+}
+
+// ── MAIN SEND ────────────────────────────────────────────────────────────────
+async function sendMessage() {
+  const input   = document.getElementById("userInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const text    = input.value.trim();
+  if (!text || sendBtn.disabled) return;
+
+  input.value = "";
+  input.style.height = "auto";
+  sendBtn.disabled = true;
+  msgCount++;
+  document.getElementById("msgCount").textContent = msgCount;
+
+  // Show user message
+  addMessage("user", text.replace(/</g,"&lt;").replace(/>/g,"&gt;"));
+
+  // ── LAYER 1: GUARDRAILS ──
+  const guard = checkGuardrails(text);
+  addGuardLog(text, guard.safe, guard.reason);
+
+  if (!guard.safe) {
+    blockedCount++;
+    document.getElementById("blockedCount").textContent = blockedCount;
+    addMessage("bot",
+      `<strong>🛡️ Request Blocked</strong><br><br>Your message was flagged by our safety system: <em>${guard.reason}</em>.<br><br>Please ask a genuine medical question.`,
+      "BLOCKED"
+    );
+    sendBtn.disabled = false;
+    return;
+  }
+
+  // Show thinking
+  const thinkingRow = addThinking();
+
+  try {
+    // ── AGENT 1: TRIAGE ──
+    await delay(400);
+    setStep("step-triage", "running");
+    const urgency = triageQuery(text);
+    await delay(400);
+    setStep("step-triage", "done");
+
+    // ── AGENT 2: RAG EVIDENCE ──
+    setStep("step-rag", "running");
+    await delay(500);
+    const sources = retrieveContext(text);
+    const context = sources.map((s,i) => `[${i+1}] ${s.content}`).join("\n\n");
+    setStep("step-rag", "done");
+
+    // ── AGENT 3: GEMINI LLM ──
+    setStep("step-gen", "running");
+
+    // Build conversation for memory
+    const history = conversationHistory.slice(-6).map(m => ({
+      role: m.role,
+      parts: [{ text: m.text }]
+    }));
+
+    const systemPrompt = `You are MediMind AI, a professional medical information assistant. 
+You MUST follow these rules:
+1. Use ONLY the provided medical context to answer. Cite sources as [1], [2], [3].
+2. Be clear, structured, and empathetic.
+3. For EMERGENCY urgency: ALWAYS say "Call 911 / Emergency Services immediately" first.
+4. For URGENT urgency: ALWAYS say "See a doctor today" prominently.
+5. End EVERY response with: "⚕️ This is informational only. Please consult a licensed physician."
+6. Never prescribe specific medications or dosages.
+7. Keep responses concise but complete.
+
+Urgency level detected: ${urgency}
+
+Medical Context (from knowledge base):
+${context}`;
+
+    const messages = [
+      ...history,
+      { role: "user", parts: [{ text: systemPrompt + "\n\nUser question: " + text }] }
+    ];
+
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: messages,
+        generationConfig: { temperature: 0.3, maxOutputTokens: 800 }
+      })
+    });
+
+    const data = await response.json();
+    setStep("step-gen", "done");
+
+    if (!response.ok) throw new Error(data.error?.message || "API error");
+
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "I couldn't generate a response. Please try again.";
+
+    // ── AGENT 4: SAFETY VALIDATION ──
+    setStep("step-safety", "running");
+    await delay(300);
+    let safeReply = reply;
+    if (!safeReply.includes("⚕️")) {
+      safeReply += "\n\n⚕️ This is informational only. Please consult a licensed physician.";
+    }
+    setStep("step-safety", "done");
+    await delay(200);
+
+    // Save to memory
+    conversationHistory.push({ role: "user",  text });
+    conversationHistory.push({ role: "model", text: safeReply });
+    if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
+
+    // Remove thinking, show response
+    thinkingRow.remove();
+    addMessage("bot", safeReply.replace(/\n/g, "<br>").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"), urgency, sources);
+    updateMemory(text, safeReply);
+
+  } catch (err) {
+    thinkingRow.remove();
+    addMessage("bot", `<strong>⚠️ Error</strong><br><br>${err.message}<br><br>Please check your API key or try again.`);
+    console.error(err);
+  }
+
+  sendBtn.disabled = false;
+}
+
+function quickAsk(q) {
+  document.getElementById("userInput").value = q;
+  sendMessage();
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Auto-resize textarea
+document.getElementById("userInput").addEventListener("input", function() {
+  this.style.height = "auto";
+  this.style.height = Math.min(this.scrollHeight, 100) + "px";
+});
+
+// Enter to send
+document.getElementById("userInput").addEventListener("keydown", function(e) {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+</script>
+</body>
+</html>
